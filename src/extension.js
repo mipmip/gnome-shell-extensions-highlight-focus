@@ -19,6 +19,7 @@
 /* exported init */
 const _handles = [];
 const Mainloop = imports.mainloop;
+const Meta = imports.gi.Meta;
 const St = imports.gi.St;
 const borders = [];
 
@@ -27,15 +28,26 @@ class Extension {
   }
 
   remove_all_borders(){
-    borders.forEach((_border)=>{
+    borders.forEach((_border, index, object)=>{
       _border.destroy();
+      object.splice(index, 1);
     });
   }
 
   highlight_window(act){
 
+    Mainloop.timeout_add(1000, () => {
+      this.sizing = false;
+    });
+
+    if(this.sizing){
+      return;
+    }
     let win = global.display.focus_window;
     if (win == null) {
+      return;
+    }
+    if (win.window_type !== Meta.WindowType.NORMAL){
       return;
     }
 
@@ -54,17 +66,27 @@ class Extension {
     border.show();
 
     Mainloop.timeout_add(1000, () => {
-      border.destroy();
+    });
+    Mainloop.timeout_add(1000, () => {
+      if(border){
+        border.destroy();
+      }
     });
   }
 
   enable() {
     _handles.push(global.display.connect('notify::focus-window', (_, act) => {this.highlight_window(act);}));
+    _handles.push(global.window_manager.connect('size-change', () => {this.sizing = true;}));
+    _handles.push(global.window_manager.connect('size-changed', () => {this.sizing = false;}));
+    _handles.push(global.window_manager.connect('unminimize', () => {this.sizing = true; global.log('unminize');}));
+    _handles.push(global.display.connect('grab-op-begin', () => {this.remove_all_borders();}));
+    _handles.push(global.display.connect('grab-op-end', () => {this.remove_all_borders();}));
   }
 
   disable() {
     _handles.splice(0).forEach(h => global.window_manager.disconnect(h));
     this.remove_all_borders();
+    this.sizing = null;
   }
 }
 
