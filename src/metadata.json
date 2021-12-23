@@ -1,0 +1,8 @@
+{
+  "name": "Highlight Focus",
+  "description": "Highlights the focussed window with a temporary border",
+  "uuid": "highlight-focus@pimsnel.com",
+  "shell-version": [
+    "40"
+  ]
+}
