@@ -1,7 +1,10 @@
 /* Add your custom extension styling here */
 .highlight-border {
-  border-width: 3px;
-  border-color: rgba(236,94,94,1);
+  border-width: 4px;
+  border-color: rgba(17,199,224,1);
   border-style: solid;
+  border-radius: 6px;
+  border-top-left-radius: 6px;
+  border-top-right-radius: 6px;
 }
 

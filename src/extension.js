@@ -18,7 +18,6 @@
 
 /* exported init */
 const _handles = [];
-//const _borders = [];
 const Mainloop = imports.mainloop;
 const St = imports.gi.St;
 const borders = [];
@@ -55,7 +54,6 @@ class Extension {
     border.show();
 
     Mainloop.timeout_add(1000, () => {
-      //global.window_group.remove_child(windowActor.border);
       border.destroy();
     });
   }
