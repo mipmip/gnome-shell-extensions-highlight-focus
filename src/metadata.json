@@ -3,7 +3,7 @@
   "description": "Highlights the focussed window with a temporary border",
   "uuid": "highlight-focus@pimsnel.com",
   "url": "https://github.com/mipmip/gnome-shell-extensions-highlight-focus",
-  "version": 1,
+  "version": 2,
   "shell-version": [
     "3.36",
     "3.38",

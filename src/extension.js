@@ -18,7 +18,8 @@
 
 /* exported init */
 const _handles = [];
-const Mainloop = imports.mainloop;
+const _timeouts = [];
+const GLib = imports.gi.GLib;
 const Meta = imports.gi.Meta;
 const St = imports.gi.St;
 const borders = [];
@@ -29,16 +30,28 @@ class Extension {
 
   remove_all_borders(){
     borders.forEach((_border, index, object)=>{
-      _border.destroy();
-      object.splice(index, 1);
+      if(_border && typeof _border.destroy !== "undefined") {
+        _border.destroy();
+        object.splice(index, 1);
+      }
+    });
+  }
+
+  remove_all_timeouts(){
+    _timeouts.splice(0).forEach((t) => {
+      if (t) {
+        GLib.Source.remove(t);
+        t = null;
+      }
     });
   }
 
   highlight_window(act){
 
-    Mainloop.timeout_add(1000, () => {
+    _timeouts.push(GLib.timeout_add(GLib.PRIORITY_DEFAULT, 1000, () => {
       this.sizing = false;
-    });
+      return GLib.SOURCE_CONTINUE;
+    }));
 
     if(this.sizing){
       return;
@@ -52,10 +65,10 @@ class Extension {
     }
 
     this.remove_all_borders();
+    this.remove_all_timeouts();
 
     let wid = win.get_id();
     let border = new St.Bin({style_class: "highlight-border"});
-    borders.push(border);
     global.window_group.add_child(border);
 
     let rect = win.get_frame_rect();
@@ -64,27 +77,26 @@ class Extension {
     border.set_size(rect.width + (inset * 2), rect.height + (inset * 2));
     border.set_position(rect.x - inset, rect.y - inset);
     border.show();
+    borders.push(border);
 
-    Mainloop.timeout_add(1000, () => {
-    });
-    Mainloop.timeout_add(1000, () => {
-      if(border){
-        border.destroy();
-      }
-    });
+    _timeouts.push(GLib.timeout_add(GLib.PRIORITY_DEFAULT, 1000, () => {
+      this.remove_all_borders();
+      return GLib.SOURCE_CONTINUE;
+    }));
   }
 
   enable() {
     _handles.push(global.display.connect('notify::focus-window', (_, act) => {this.highlight_window(act);}));
     _handles.push(global.window_manager.connect('size-change', () => {this.sizing = true;}));
     _handles.push(global.window_manager.connect('size-changed', () => {this.sizing = false;}));
-    _handles.push(global.window_manager.connect('unminimize', () => {this.sizing = true; global.log('unminize');}));
+    _handles.push(global.window_manager.connect('unminimize', () => {this.sizing = true;}));
     _handles.push(global.display.connect('grab-op-begin', () => {this.remove_all_borders();}));
     _handles.push(global.display.connect('grab-op-end', () => {this.remove_all_borders();}));
   }
 
   disable() {
     _handles.splice(0).forEach(h => global.window_manager.disconnect(h));
+    this.remove_all_timeouts();
     this.remove_all_borders();
     this.sizing = null;
   }
