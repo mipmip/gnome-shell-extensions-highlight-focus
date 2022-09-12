@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## v3
+- support 43
+
 ## v2
 - improve memory management
 
