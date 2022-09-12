@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## v2
+- improve memory management
+
 ## v1
 
 - initial extension
