@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## v4
+- style settings
+- delay settings
+- no more Gnome 3.6.x support
+
 ## v3
 - support 43
 

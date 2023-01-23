@@ -10,11 +10,14 @@ fi
 NAME=highlight-focus\@pimsnel.com
 
 function pack-extension {
-echo "Packing extension..."
-gnome-extensions pack src \
-  --force \
-  --extra-source="../LICENSE" \
-  --extra-source="../CHANGELOG.md"
+  echo "Packing extension..."
+  compile-preferences
+  gnome-extensions pack src \
+    --force \
+    --extra-source="../LICENSE" \
+    --extra-source="../CHANGELOG.md" \
+    --extra-source="ui.js" \
+    --extra-source="style.js"
 }
 
 function compile-preferences {
@@ -29,14 +32,13 @@ function compile-preferences {
 function make-local-install {
     DEST=~/.local/share/gnome-shell/extensions/$NAME
 
-    #compile-translations
     compile-preferences
 
     echo 'Installing...'
     if [ ! -d $DEST ]; then
         mkdir $DEST
     fi
-    cp -r src/* locale $DEST/
+    cp -rv src/* locale $DEST/
 
 }
 
@@ -52,7 +54,6 @@ function make-zip {
 
     rm -fv "$NAME".zip
     mkdir build
-    #compile-translations
     compile-preferences
     echo 'Coping files...'
     cp -r LICENSE README.md src/* locale build/
