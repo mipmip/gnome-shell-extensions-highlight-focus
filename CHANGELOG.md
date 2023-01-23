@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## v5,6
+- review updates
+
 ## v4
 - style settings
 - delay settings
