@@ -32,7 +32,6 @@ var Style = class {
     });
 
     if (this.style_contents[name] === content) {
-      // log('skip regeneration');
       return;
     }
 
@@ -54,7 +53,6 @@ var Style = class {
 
     theme.load_stylesheet(fn);
 
-    // log(content);
   }
 
   rgba(color) {

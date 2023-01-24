@@ -59,9 +59,6 @@ class Extension {
       styles.push(`.highlight-border {${ss.join(' ')}}`);
     }
 
-    log(styles);
-
-    // log(styles);
     this._style.build('custom', styles);
   }
 
@@ -111,8 +108,6 @@ class Extension {
     this.borderWidth = this._settings.get_int("border-width");
     this.borderRadius = this._settings.get_int("border-radius");
     this.borderColor = this._settings.get_string("border-color");
-    log(this.borderColor);
-    log("hallo");
     this.disableHiding = this._settings.get_boolean("disable-hiding");
     this._updateCss();
   }

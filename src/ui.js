@@ -37,7 +37,6 @@ var Shortcut = GObject.registerClass({
     model.set_column_types([GObject.TYPE_STRING]);
     let [_, key, mods] = Gtk.accelerator_parse(shortcut[0]);
     model.set(model.insert(0), [0], [Gtk.accelerator_get_label(key, mods)]);
-    log(Gtk.accelerator_get_label(key, mods));
     let tree = new Gtk.TreeView({ model: model, headers_visible: false });
     let acc = new Gtk.CellRendererAccel({ editable: true, accel_mode: Gtk.CellRendererAccelMode.GTK });
     let column = new Gtk.TreeViewColumn();

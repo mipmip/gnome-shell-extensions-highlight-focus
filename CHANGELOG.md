@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## v7
+- again review updates
+- cleanup install script
+
+
 ## v5,6
 - review updates
 
