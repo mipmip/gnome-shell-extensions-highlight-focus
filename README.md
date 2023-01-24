@@ -1,9 +1,16 @@
 # Highlight Focus
 
+![highlightfocus](https://user-images.githubusercontent.com/658612/189703577-a3397e8e-ddff-4622-b46a-f7384fd70eb1.gif)
+
 Highlight is a GNOME Shell Extension which draws a temporary colored border
 around a focussed window. Useful in an keyboard only workflow.
 
-![highlightfocus](https://user-images.githubusercontent.com/658612/189703577-a3397e8e-ddff-4622-b46a-f7384fd70eb1.gif)
+[<img src="./get-it-on-ego.png" height="100">](https://extensions.gnome.org/extension/4699/highlight-focus/)
+
+## Features
+
+- Focus border can be styled in preferences
+- Hiding delay can be set in preferences
 
 ## Contributing
 
