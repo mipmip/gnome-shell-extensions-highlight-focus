@@ -59,7 +59,7 @@ class Extension {
       styles.push(`.highlight-border {${ss.join(' ')}}`);
     }
 
-    this._style.build('custom', styles);
+    this._style.build('custom-highlight-focus', styles);
   }
 
 
