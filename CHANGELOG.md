@@ -1,9 +1,14 @@
 # CHANGELOG
 
+
+## v8
+- configure shortcut to highlight active window
+- write custom.css in /tmp-dir, not in extension install dir, this could be
+  read only (NixOS)
+
 ## v7
 - again review updates
 - cleanup install script
-
 
 ## v5,6
 - review updates

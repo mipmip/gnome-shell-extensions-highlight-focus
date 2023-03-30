@@ -98,6 +98,11 @@ const HighlightFocusPrefsWidget = new GObject.Class({
     let mainSettingsLabel = new UI.LargeLabel("Main Settings");
     this._grid._add(mainSettingsLabel)
 
+    this._field_shortcut = new UI.Shortcut(this._settings.get_strv("keybinding-highlight-now"));
+    let label_shortcut = new UI.Label('Shortcut Highlight active Window')
+    this._grid._add(label_shortcut, this._field_shortcut);
+
+    this._field_shortcut.connect('changed', (widget, keys) => { this._settings.set_strv("keybinding-highlight-now", [keys]); });
 
     this._borderColorButton = new Gtk.ColorButton;
     this._borderColorButton.set_valign("center");

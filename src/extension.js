@@ -18,7 +18,9 @@
 const _handles = [];
 const _timeouts = [];
 const GLib = imports.gi.GLib;
+const Shell = imports.gi.Shell;
 const Meta = imports.gi.Meta;
+const Main = imports.ui.main;
 const St = imports.gi.St;
 const borders = [];
 const ExtensionUtils = imports.misc.extensionUtils;
@@ -128,8 +130,16 @@ class Extension {
     this._settings.connect("changed::border-radius", ()=>{this.initSettings();} );
     this._settings.connect("changed::border-color", ()=>{this.initSettings();} );
     this._settings.connect("changed::border-radius", ()=>{this.initSettings();} );
+
     this._style = new Style();
     this.initSettings();
+
+    const flag = Meta.KeyBindingFlags.IGNORE_AUTOREPEAT;
+    const mode = Shell.ActionMode.NORMAL | Shell.ActionMode.OVERVIEW;
+
+    Main.wm.addKeybinding("keybinding-highlight-now",this._settings, flag, mode, () => {
+      this.highlight_window(null);
+    })
   }
 
   disable() {
@@ -139,6 +149,7 @@ class Extension {
     this.sizing = null;
     this._style.unloadAll();
     this._style = null;
+    Main.wm.removeKeybinding("keybinding-highlight-now");
   }
 }
 

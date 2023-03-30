@@ -1,6 +1,12 @@
 <schemalist>
   <schema id="org.gnome.shell.extensions.highlight-focus" path="/org/gnome/shell/extensions/highlight-focus/">
 
+    <key name="keybinding-highlight-now" type="as">
+      <default><![CDATA[['<Super>l']]]></default>
+      <summary>keybinding highlight now</summary>
+      <description>Keybinding to highlight the current active window.</description>
+    </key>
+
     <key type="s" name="border-color">
         <default>"#000000"</default>
         <summary>border color</summary>

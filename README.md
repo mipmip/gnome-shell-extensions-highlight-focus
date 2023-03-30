@@ -11,6 +11,7 @@ around a focussed window. Useful in an keyboard only workflow.
 
 - Focus border can be styled in preferences
 - Hiding delay can be set in preferences
+- Configure shortcut to highlight active window
 
 ## Contributing
 
