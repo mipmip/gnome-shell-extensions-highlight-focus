@@ -1,5 +1,7 @@
 # CHANGELOG
 
+## v9
+- support Gnome 44
 
 ## v8
 - configure shortcut to highlight active window
