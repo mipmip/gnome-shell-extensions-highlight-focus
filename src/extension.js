@@ -14,98 +14,102 @@
  * along with Highlight Focus.  If not, see <http://www.gnu.org/licenses/>.
  **********************************************************************/
 
-/* exported init */
-const _handles = [];
-const _timeouts = [];
-const GLib = imports.gi.GLib;
-const Shell = imports.gi.Shell;
-const Meta = imports.gi.Meta;
-const Main = imports.ui.main;
-const St = imports.gi.St;
-const borders = [];
-const ExtensionUtils = imports.misc.extensionUtils;
-const Me = ExtensionUtils.getCurrentExtension();
-const Style = Me.imports.style.Style;
+import { Extension } from "resource:///org/gnome/shell/extensions/extension.js";
+import GLib from "gi://GLib";
+import Meta from "gi://Meta";
+import Shell from "gi://Shell";
+import St from "gi://St";
+import { wm } from "resource:///org/gnome/shell/ui/main.js";
+import { Style } from "./style.js";
 
-class Extension {
-  constructor() {
+export default class HightlightCurrentWindow extends Extension {
+  constructor(metadata) {
+    super(metadata);
+    this.handles = [];
+    this.timeouts = [];
+    this.sizing = false;
+    this.borders = [];
+    this.borderWidth = "2";
+    this.borderColor = "#000000";
+    this.borderRadius = "14";
+    this.style = null;
   }
 
-  remove_all_borders(){
-    borders.forEach((_border, index, object)=>{
-      if(_border && typeof _border.destroy !== "undefined") {
-        _border.destroy();
-        object.splice(index, 1);
-      }
-    });
-  }
+  enable() {
+    this._style = new Style();
+    this.handles.push(
+      global.display.connect(
+        "notify::focus-window",
+        this.highlight_window.bind(this),
+      ),
+    );
 
-  remove_all_timeouts(){
-    _timeouts.splice(0).forEach((t) => {
-      if (t) {
-        GLib.Source.remove(t);
-        t = null;
-      }
-    });
-  }
-
-
-  _updateCss() {
-
-    let styles = [];
-    {
-      let ss = [];
-
-      ss.push(`\n  border: ${this.borderWidth}px solid ${this.borderColor};`);
-      ss.push(`\n  border-radius: ${this.borderRadius}px;`);
-      styles.push(`.highlight-border {${ss.join(' ')}}`);
-    }
-
-    this._style.build('custom-highlight-focus', styles);
-  }
-
-
-  highlight_window(act){
-    _timeouts.push(GLib.timeout_add(GLib.PRIORITY_DEFAULT, 1000, () => {
-      this.sizing = false;
-      return GLib.SOURCE_CONTINUE;
-    }));
-
-    if(this.sizing){
-      return;
-    }
-    let win = global.display.focus_window;
-    if (win == null) {
-      return;
-    }
-    if (win.window_type !== Meta.WindowType.NORMAL){
-      return;
-    }
-
-    this.remove_all_borders();
-    this.remove_all_timeouts();
-
-    let wid = win.get_id();
-    let border = new St.Bin({style_class: "highlight-border"});
-    global.window_group.add_child(border);
-
-    let rect = win.get_frame_rect();
-    let inset = 2;
-
-    border.set_size(rect.width + (inset * 2), rect.height + (inset * 2));
-    border.set_position(rect.x - inset, rect.y - inset);
-    border.show();
-    borders.push(border);
-
-    if(!this.disableHiding){
-      _timeouts.push(GLib.timeout_add(GLib.PRIORITY_DEFAULT, this.hideDelay, () => {
+    this.handles.push(
+      global.window_manager.connect("size-change", () => {
         this.remove_all_borders();
-        return GLib.SOURCE_CONTINUE;
-      }));
-    }
+        this.sizing = true;
+      }),
+    );
+    this.handles.push(
+      global.window_manager.connect("size-changed", () => {
+        this.sizing = false;
+        this.highlight_window(null, null);
+      }),
+    );
+    this.handles.push(
+      global.window_manager.connect("unminimize", () => {
+        this.sizing = true;
+      }),
+    );
+    this.handles.push(
+      global.display.connect("grab-op-begin", () => {
+        this.remove_all_borders();
+      }),
+    );
+    this.handles.push(
+      global.display.connect("grab-op-end", () => {
+        this.remove_all_borders();
+        this.highlight_window(null, null);
+      }),
+    );
+
+    this._settings = this.getSettings();
+    this._settings.connect("changed::disable-hiding", () => {
+      this.initSettings();
+    });
+    this._settings.connect("changed::hide-delay", () => {
+      this.initSettings();
+    });
+    this._settings.connect("changed::border-width", () => {
+      this.initSettings();
+    });
+    this._settings.connect("changed::border-radius", () => {
+      this.initSettings();
+    });
+    this._settings.connect("changed::border-color", () => {
+      this.initSettings();
+    });
+    this._settings.connect("changed::border-radius", () => {
+      this.initSettings();
+    });
+
+    this.style = new Style();
+    this.initSettings();
+
+    const flag = Meta.KeyBindingFlags.IGNORE_AUTOREPEAT;
+    const mode = Shell.ActionMode.NORMAL | Shell.ActionMode.OVERVIEW;
+    wm.addKeybinding(
+      "keybinding-highlight-now",
+      this._settings,
+      flag,
+      mode,
+      () => {
+        this.highlight_window(null, null);
+      },
+    );
   }
 
-  initSettings(){
+  initSettings() {
     this.hideDelay = this._settings.get_int("hide-delay");
     this.borderWidth = this._settings.get_int("border-width");
     this.borderRadius = this._settings.get_int("border-radius");
@@ -114,45 +118,90 @@ class Extension {
     this._updateCss();
   }
 
-  enable() {
-
-    _handles.push(global.display.connect('notify::focus-window', (_, act) => {this.highlight_window(act);}));
-    _handles.push(global.window_manager.connect('size-change', () => {this.sizing = true;}));
-    _handles.push(global.window_manager.connect('size-changed', () => {this.sizing = false;}));
-    _handles.push(global.window_manager.connect('unminimize', () => {this.sizing = true;}));
-    _handles.push(global.display.connect('grab-op-begin', () => {this.remove_all_borders();}));
-    _handles.push(global.display.connect('grab-op-end', () => {this.remove_all_borders();}));
-
-    this._settings = ExtensionUtils.getSettings();
-    this._settings.connect("changed::disable-hiding", ()=>{this.initSettings();} );
-    this._settings.connect("changed::hide-delay", ()=>{this.initSettings();} );
-    this._settings.connect("changed::border-width", ()=>{this.initSettings();} );
-    this._settings.connect("changed::border-radius", ()=>{this.initSettings();} );
-    this._settings.connect("changed::border-color", ()=>{this.initSettings();} );
-    this._settings.connect("changed::border-radius", ()=>{this.initSettings();} );
-
-    this._style = new Style();
-    this.initSettings();
-
-    const flag = Meta.KeyBindingFlags.IGNORE_AUTOREPEAT;
-    const mode = Shell.ActionMode.NORMAL | Shell.ActionMode.OVERVIEW;
-
-    Main.wm.addKeybinding("keybinding-highlight-now",this._settings, flag, mode, () => {
-      this.highlight_window(null);
-    })
-  }
-
   disable() {
-    _handles.splice(0).forEach(h => global.window_manager.disconnect(h));
+    this.handles.splice(0).forEach((h) => global.window_manager.disconnect(h));
     this.remove_all_timeouts();
     this.remove_all_borders();
     this.sizing = null;
     this._style.unloadAll();
     this._style = null;
-    Main.wm.removeKeybinding("keybinding-highlight-now");
+    wm.removeKeybinding("keybinding-highlight-now");
   }
-}
 
-function init() {
-  return new Extension();
+  remove_all_borders() {
+    this.borders.forEach((_border, index, object) => {
+      if (_border && typeof _border.destroy !== "undefined") {
+        _border.destroy();
+        object.splice(index, 1);
+      }
+    });
+  }
+
+  remove_all_timeouts() {
+    this.timeouts.splice(0).forEach((t) => {
+      if (t) {
+        GLib.Source.remove(t);
+        t = null;
+      }
+    });
+  }
+
+  _updateCss() {
+    let styles = [];
+    {
+      let ss = [];
+
+      ss.push(`\n  border: ${this.borderWidth}px solid ${this.borderColor};`);
+      ss.push(`\n  border-radius: ${this.borderRadius}px;`);
+      styles.push(`.highlight-border {${ss.join(" ")}}`);
+    }
+
+    this._style.build("custom-highlight-focus", styles);
+  }
+
+  highlight_window(emitter, acct) {
+    this.timeouts.push(
+      GLib.timeout_add(GLib.PRIORITY_DEFAULT, 1000, () => {
+        this.sizing = false;
+        return GLib.SOURCE_CONTINUE;
+      }),
+    );
+    if (this.sizing) {
+      console.error(`${sizing}`);
+      return;
+    }
+
+    this.remove_all_borders();
+    this.remove_all_timeouts();
+
+    const win = global.display.focus_window;
+    if (
+      win == null ||
+      win.window_type !== Meta.WindowType.NORMAL ||
+      (win.maximized_horizontally && win.maximized_vertically)
+    ) {
+      console.error(`${win}`);
+      return;
+    }
+
+    const wid = win.get_id();
+    const border = new St.Bin({ style_class: "highlight-border" });
+    global.window_group.add_child(border);
+    let rect = win.get_frame_rect();
+    let inset = 2;
+
+    border.set_size(rect.width + inset * 2, rect.height + inset * 2);
+    border.set_position(rect.x - inset, rect.y - inset);
+    border.show();
+    this.borders.push(border);
+
+    if (!this.disableHiding) {
+      this.timeouts.push(
+        GLib.timeout_add(GLib.PRIORITY_DEFAULT, this.hideDelay, () => {
+          this.remove_all_borders();
+          return GLib.SOURCE_CONTINUE;
+        }),
+      );
+    }
+  }
 }

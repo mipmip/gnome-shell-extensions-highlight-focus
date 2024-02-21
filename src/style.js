@@ -1,12 +1,23 @@
-'use strict';
+/*********************************************************************
+ * Highlight Focus is Copyright (C) 2021-2023 Pim Snel
+ *
+ * Highlight Focus is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 3 as
+ * published by the Free Software Foundation
+ *
+ * Highlight Focus is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Highlight Focus.  If not, see <http://www.gnu.org/licenses/>.
+ **********************************************************************/
 
-const { St, Shell, GObject, Gio, GLib, Gtk, Meta, Clutter } = imports.gi;
+import St from "gi://St";
+import Gio from "gi://Gio";
 
-const ExtensionUtils = imports.misc.extensionUtils;
-const Me = ExtensionUtils.getCurrentExtension();
-const CustomStylesPath = '/tmp';
-
-var Style = class {
+export class Style {
   constructor() {
     this.styles = {};
     this.style_contents = {};
@@ -26,7 +37,7 @@ var Style = class {
     let ctx = St.ThemeContext.get_for_stage(global.stage);
     let theme = ctx.get_theme();
 
-    let content = '';
+    let content = "";
     style_array.forEach((k) => {
       content = `${content}\n${k}`;
     });
@@ -38,7 +49,7 @@ var Style = class {
     if (fn) {
       theme.unload_stylesheet(fn);
     } else {
-      fn = Gio.File.new_for_path(`${CustomStylesPath}/${name}.css`);
+      fn = Gio.File.new_for_path(`/tmp/${name}.css`);
       this.styles[name] = fn;
     }
 
@@ -48,17 +59,17 @@ var Style = class {
       null,
       false,
       Gio.FileCreateFlags.REPLACE_DESTINATION,
-      null
+      null,
     );
 
     theme.load_stylesheet(fn);
-
   }
 
   rgba(color) {
     let clr = color || [1, 1, 1, 1];
     let res = clr.map((r) => Math.floor(255 * r));
     res[3] = clr[3].toFixed(1);
-    return res.join(',');
+    return res.join(",");
   }
-};
+}
+

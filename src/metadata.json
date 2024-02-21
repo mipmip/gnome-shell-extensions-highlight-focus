@@ -5,12 +5,8 @@
   "url": "https://github.com/mipmip/gnome-shell-extensions-highlight-focus",
   "gettext-domain": "highligh-focus",
   "settings-schema": "org.gnome.shell.extensions.highlight-focus",
-  "version": 9,
+  "version": 10,
   "shell-version": [
-    "40",
-    "41",
-    "42",
-    "43",
-    "44"
+    "45"
   ]
 }
