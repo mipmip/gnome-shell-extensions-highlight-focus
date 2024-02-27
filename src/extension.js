@@ -25,7 +25,8 @@ import { Style } from "./style.js";
 export default class HightlightCurrentWindow extends Extension {
   constructor(metadata) {
     super(metadata);
-    this.handles = [];
+    this.handles_wm = [];
+    this.handles_display = [];
     this.timeouts = [];
     this.sizing = false;
     this.borders = [];
@@ -37,42 +38,40 @@ export default class HightlightCurrentWindow extends Extension {
 
   enable() {
     this._style = new Style();
-    this.handles.push(
+    this.handles_display.push(
       global.display.connect(
         "notify::focus-window",
         this.highlight_window.bind(this),
       ),
     );
-
-    this.handles.push(
-      global.window_manager.connect("size-change", () => {
-        this.remove_all_borders();
-        this.sizing = true;
-      }),
-    );
-    this.handles.push(
-      global.window_manager.connect("size-changed", () => {
-        this.sizing = false;
-        this.highlight_window(null, null);
-      }),
-    );
-    this.handles.push(
-      global.window_manager.connect("unminimize", () => {
-        this.sizing = true;
-      }),
-    );
-    this.handles.push(
+    this.handles_display.push(
       global.display.connect("grab-op-begin", () => {
         this.remove_all_borders();
       }),
     );
-    this.handles.push(
+    this.handles_display.push(
       global.display.connect("grab-op-end", () => {
         this.remove_all_borders();
         this.highlight_window(null, null);
       }),
     );
-
+    this.handles_wm.push(
+      global.window_manager.connect("size-change", () => {
+        this.remove_all_borders();
+        this.sizing = true;
+      }),
+    );
+    this.handles_wm.push(
+      global.window_manager.connect("size-changed", () => {
+        this.sizing = false;
+        this.highlight_window(null, null);
+      }),
+    );
+    this.handles_wm.push(
+      global.window_manager.connect("unminimize", () => {
+        this.sizing = true;
+      }),
+    );
     this._settings = this.getSettings();
     this._settings.connect("changed::disable-hiding", () => {
       this.initSettings();
@@ -119,13 +118,15 @@ export default class HightlightCurrentWindow extends Extension {
   }
 
   disable() {
-    this.handles.splice(0).forEach((h) => global.window_manager.disconnect(h));
+    this.handles_display.splice(0).forEach((h) => global.display.disconnect(h));
+    this.handles_wm.splice(0).forEach((h) => global.window_manager.disconnect(h));
     this.remove_all_timeouts();
     this.remove_all_borders();
     this.sizing = null;
     this._style.unloadAll();
     this._style = null;
     wm.removeKeybinding("keybinding-highlight-now");
+    this._settings = null;
   }
 
   remove_all_borders() {
