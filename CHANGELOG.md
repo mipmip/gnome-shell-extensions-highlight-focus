@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## v1-0
+- support Gnome 44
+
 ## v9
 - support Gnome 44
 
