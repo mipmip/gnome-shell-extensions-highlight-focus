@@ -1,5 +1,5 @@
 /*********************************************************************
- * Highlight Focus is Copyright (C) 2021-2023 Pim Snel
+ * Highlight Focus is Copyright (C) 2021-2024 Pim Snel
  *
  * Highlight Focus is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as

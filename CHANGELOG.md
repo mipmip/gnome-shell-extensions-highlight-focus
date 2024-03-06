@@ -1,7 +1,10 @@
 # CHANGELOG
 
-## v1-0
-- support Gnome 44
+## v11
+- fix unbindings after review
+
+## v10
+- support Gnome 45, thanks Samuel Abreu! (https://github.com/samuelabreu)
 
 ## v9
 - support Gnome 44
