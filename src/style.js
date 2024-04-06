@@ -18,9 +18,10 @@ import St from "gi://St";
 import Gio from "gi://Gio";
 
 export class Style {
-  constructor() {
+  constructor(metadata) {
     this.styles = {};
     this.style_contents = {};
+    this.metadata = metadata;
   }
 
   unloadAll() {
@@ -49,7 +50,7 @@ export class Style {
     if (fn) {
       theme.unload_stylesheet(fn);
     } else {
-      fn = Gio.File.new_for_path(`/tmp/${name}.css`);
+      fn = Gio.File.new_for_path(`${this.metadata.path}/style.css`);
       this.styles[name] = fn;
     }
 
