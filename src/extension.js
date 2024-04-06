@@ -34,10 +34,11 @@ export default class HightlightCurrentWindow extends Extension {
     this.borderColor = "#000000";
     this.borderRadius = "14";
     this.style = null;
+    this.metadata = metadata;
   }
 
   enable() {
-    this._style = new Style();
+    this._style = new Style(this.metadata);
     this.handles_display.push(
       global.display.connect(
         "notify::focus-window",
@@ -92,7 +93,7 @@ export default class HightlightCurrentWindow extends Extension {
       this.initSettings();
     });
 
-    this.style = new Style();
+    this.style = new Style(this.metadata);
     this.initSettings();
 
     const flag = Meta.KeyBindingFlags.IGNORE_AUTOREPEAT;
