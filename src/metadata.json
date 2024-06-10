@@ -7,6 +7,7 @@
   "settings-schema": "org.gnome.shell.extensions.highlight-focus",
   "version": 11,
   "shell-version": [
-    "45"
+    "45",
+    "46"
   ]
 }

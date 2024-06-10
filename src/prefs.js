@@ -15,6 +15,7 @@
  **********************************************************************/
 
 import Gio from "gi://Gio";
+//import Gdk from "gi://Gdk";
 import Gtk from "gi://Gtk";
 import Adw from "gi://Adw";
 import { EntryRow } from "./ui.js";
@@ -118,6 +119,14 @@ export default class HightlightCurrentWindowPreferences extends ExtensionPrefere
     borderColorButton.set_dialog(new Gtk.ColorDialog());
     borderColorButton.set_valign("center");
     borderColorButton.set_hexpand(false);
+
+    /* NOT SETTING COLOR seee: https://github.com/mipmip/gnome-shell-extensions-highlight-focus/issues/18
+    console.log("highl",window._settings.get_string("border-color"));
+    let color = new Gdk.RGBA()
+    let parsedcolor = color.parse(window._settings.get_string("border-color"));
+    console.log("highl2",parsedcolor);
+    borderColorButton.set_rgba(parsedcolor);
+    */
 
     color_row.add_suffix(borderColorButton);
     group.add(color_row);

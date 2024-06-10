@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## v12
+- code cleanup
+- support Gnome 46
+
 ## v11
 - fix unbindings after review
 

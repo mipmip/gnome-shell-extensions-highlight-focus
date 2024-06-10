@@ -52,7 +52,7 @@ export default class HightlightCurrentWindow extends Extension {
     this.handles_display.push(
       global.display.connect("grab-op-end", () => {
         this.remove_all_borders();
-        this.highlight_window(null, null);
+        this.highlight_window();
       }),
     );
     this.handles_wm.push(
@@ -64,7 +64,7 @@ export default class HightlightCurrentWindow extends Extension {
     this.handles_wm.push(
       global.window_manager.connect("size-changed", () => {
         this.sizing = false;
-        this.highlight_window(null, null);
+        this.highlight_window();
       }),
     );
     this.handles_wm.push(
@@ -103,7 +103,7 @@ export default class HightlightCurrentWindow extends Extension {
       flag,
       mode,
       () => {
-        this.highlight_window(null, null);
+        this.highlight_window();
       },
     );
   }
@@ -160,7 +160,7 @@ export default class HightlightCurrentWindow extends Extension {
     this._style.build("custom-highlight-focus", styles);
   }
 
-  highlight_window(emitter, acct) {
+  highlight_window() {
     this.timeouts.push(
       GLib.timeout_add(GLib.PRIORITY_DEFAULT, 1000, () => {
         this.sizing = false;

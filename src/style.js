@@ -27,13 +27,13 @@ export class Style {
     let ctx = St.ThemeContext.get_for_stage(global.stage);
     let theme = ctx.get_theme();
     Object.keys(this.styles).forEach((k) => {
-      let fn = this.styles[k];
-      theme.unload_stylesheet(fn);
+      let filename = this.styles[k];
+      theme.unload_stylesheet(filename);
     });
   }
 
   build(name, style_array) {
-    let fn = this.styles[name];
+    let filename = this.styles[name];
     let ctx = St.ThemeContext.get_for_stage(global.stage);
     let theme = ctx.get_theme();
 
@@ -46,15 +46,15 @@ export class Style {
       return;
     }
 
-    if (fn) {
-      theme.unload_stylesheet(fn);
+    if (filename) {
+      theme.unload_stylesheet(filename);
     } else {
-      fn = Gio.File.new_for_path(`/tmp/${name}.css`);
-      this.styles[name] = fn;
+      filename = Gio.File.new_for_path(`/tmp/${name}-${Math.floor(Math.random() * 999999)}.css`);
+      this.styles[name] = filename;
     }
 
     this.style_contents[name] = content;
-    const [, etag] = fn.replace_contents(
+    const [, etag] = filename.replace_contents(
       content,
       null,
       false,
@@ -62,7 +62,7 @@ export class Style {
       null,
     );
 
-    theme.load_stylesheet(fn);
+    theme.load_stylesheet(filename);
   }
 
   rgba(color) {
