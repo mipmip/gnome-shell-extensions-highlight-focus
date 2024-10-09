@@ -13,6 +13,10 @@ around a focussed window. Useful in an keyboard only workflow.
 - Hiding delay can be set in preferences
 - Configure shortcut to highlight active window
 
+## Works great with
+
+- https://github.com/martinhjartmyr/gnome-shell-extension-focus-changer
+
 ## Contributing
 
 1. Fork it ( https://github.com/mipmip/gnome-shell-extensions-highlight-focus/fork )

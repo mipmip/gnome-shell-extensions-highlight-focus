@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## v13
+- support Gnome 47
+
 ## v12
 - code cleanup
 - support Gnome 46
