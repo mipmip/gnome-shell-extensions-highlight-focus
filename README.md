@@ -7,6 +7,9 @@ around a focussed window. Useful in an keyboard only workflow.
 
 [<img src="./get-it-on-ego.png" height="100">](https://extensions.gnome.org/extension/4699/highlight-focus/)
 
+## Release Notes
+- Updated for Gnome 49
+
 ## Features
 
 - Focus border can be styled in preferences
