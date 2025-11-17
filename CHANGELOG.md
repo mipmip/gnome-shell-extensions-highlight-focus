@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## v14
+- support Gnome 49
+
 ## v13
 - support Gnome 47
 

@@ -168,7 +168,7 @@ export default class HightlightCurrentWindow extends Extension {
       }),
     );
     if (this.sizing) {
-      console.error(`${sizing}`);
+      console.error(`${this.sizing}`);
       return;
     }
 
