@@ -15,7 +15,7 @@
  **********************************************************************/
 
 import Gio from "gi://Gio";
-//import Gdk from "gi://Gdk";
+import Gdk from "gi://Gdk";
 import Gtk from "gi://Gtk";
 import Adw from "gi://Adw";
 import { EntryRow } from "./ui.js";
@@ -112,36 +112,61 @@ export default class HightlightCurrentWindowPreferences extends ExtensionPrefere
     group.add(keybind_row);
 
 
-    const color_row = new Adw.EntryRow({
+    const color_row = new Adw.ActionRow({
       title: _("Pick Color"),
     });
-    const borderColorButton = new Gtk.ColorDialogButton;
+    const borderColorButton = new Gtk.ColorDialogButton();
     borderColorButton.set_dialog(new Gtk.ColorDialog());
     borderColorButton.set_valign("center");
     borderColorButton.set_hexpand(false);
 
-    /* NOT SETTING COLOR seee: https://github.com/mipmip/gnome-shell-extensions-highlight-focus/issues/18
-    console.log("highl",window._settings.get_string("border-color"));
-    let color = new Gdk.RGBA()
-    let parsedcolor = color.parse(window._settings.get_string("border-color"));
-    console.log("highl2",parsedcolor);
-    borderColorButton.set_rgba(parsedcolor);
-    */
+    // Initialize color button with saved color from settings
+    const savedColorHex = window._settings.get_string("border-color");
+    const color = new Gdk.RGBA();
+    if (color.parse(savedColorHex)) {
+      borderColorButton.set_rgba(color);
+    }
 
     color_row.add_suffix(borderColorButton);
     group.add(color_row);
-    window._settings.bind(
-      "border-color",
-      color_row,
-      "text",
-      Gio.SettingsBindFlags.DEFAULT,
-    );
 
+    // Hex value input field
+    const color_hex_row = new Adw.EntryRow({
+      title: _("Color Hex Value"),
+    });
+    color_hex_row.set_text(savedColorHex);
+    group.add(color_hex_row);
+
+    // Update settings and color button when hex input changes
+    color_hex_row.connect("changed", () => {
+      const hexValue = color_hex_row.get_text();
+      // Validate hex color format
+      if (/^#[0-9A-Fa-f]{6}$/.test(hexValue)) {
+        const newColor = new Gdk.RGBA();
+        if (newColor.parse(hexValue)) {
+          borderColorButton.set_rgba(newColor);
+          window._settings.set_string("border-color", hexValue);
+        }
+      }
+    });
+
+    // Update hex input field when color picker changes
     borderColorButton.connect("notify::rgba", (button) => {
       let rgba = button.get_rgba();
       let css = rgba.to_string();
       let hexString = cssHexString(css);
       window._settings.set_string("border-color", hexString);
+      color_hex_row.set_text(hexString);
+    });
+
+    // Update hex input field when settings change externally
+    window._settings.connect("changed::border-color", () => {
+      const newHex = window._settings.get_string("border-color");
+      color_hex_row.set_text(newHex);
+      const newColor = new Gdk.RGBA();
+      if (newColor.parse(newHex)) {
+        borderColorButton.set_rgba(newColor);
+      }
     });
 
     this.create_spin_row(

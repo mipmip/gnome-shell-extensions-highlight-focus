@@ -19,6 +19,9 @@ import GLib from "gi://GLib";
 import Meta from "gi://Meta";
 import Shell from "gi://Shell";
 import St from "gi://St";
+import * as PanelMenu from "resource:///org/gnome/shell/ui/panelMenu.js";
+import * as PopupMenu from "resource:///org/gnome/shell/ui/popupMenu.js";
+import * as Main from "resource:///org/gnome/shell/ui/main.js";
 import { wm } from "resource:///org/gnome/shell/ui/main.js";
 import { Style } from "./style.js";
 
@@ -34,6 +37,9 @@ export default class HightlightCurrentWindow extends Extension {
     this.borderColor = "#000000";
     this.borderRadius = "14";
     this.style = null;
+    this.indicator = null;
+    this.toggleMenuItem = null;
+    this.enabled = true;
   }
 
   enable() {
@@ -91,6 +97,11 @@ export default class HightlightCurrentWindow extends Extension {
     this._settings.connect("changed::border-radius", () => {
       this.initSettings();
     });
+    this._settings.connect("changed::enabled", () => {
+      this.initSettings();
+      this._updateToggleMenuItem();
+      this.highlight_window();
+    });
 
     this.style = new Style();
     this.initSettings();
@@ -106,6 +117,87 @@ export default class HightlightCurrentWindow extends Extension {
         this.highlight_window();
       },
     );
+
+    // Add menubar icon (must be after settings are initialized)
+    try {
+      this._createIndicator();
+    } catch (e) {
+      console.error(`Error creating indicator: ${e}`);
+    }
+  }
+
+  _createIndicator() {
+    if (!this._settings) {
+      console.error("Settings not initialized when creating indicator");
+      return;
+    }
+    
+    try {
+      this.indicator = new PanelMenu.Button(0.5, "Highlight Focus", false);
+      
+      const icon = new St.Icon({
+        icon_name: "preferences-desktop-display-symbolic",
+        style_class: "system-status-icon",
+      });
+      
+      this.indicator.add_child(icon);
+      this.indicator.add_style_class_name("panel-status-button");
+      
+      // Add menu items
+      const menu = this.indicator.menu;
+      // Center the menu above the icon
+      menu.sourceAlignment = 0.5;
+      
+      // Toggle enabled/disabled menu item
+      let currentEnabled = true;
+      try {
+        currentEnabled = this._settings.get_boolean("enabled");
+      } catch (e) {
+        console.error(`Error reading enabled setting: ${e}`);
+        // Default to true if setting doesn't exist
+        currentEnabled = true;
+      }
+      
+      this.toggleMenuItem = new PopupMenu.PopupSwitchMenuItem("Enable Border Highlighting", currentEnabled);
+      this.toggleMenuItem.connect("activate", () => {
+        try {
+          const newValue = !this._settings.get_boolean("enabled");
+          this._settings.set_boolean("enabled", newValue);
+        } catch (e) {
+          console.error(`Error toggling enabled setting: ${e}`);
+        }
+      });
+      menu.addMenuItem(this.toggleMenuItem);
+      
+      menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
+      
+      const preferencesItem = new PopupMenu.PopupMenuItem("Preferences");
+      preferencesItem.connect("activate", () => {
+        this._openPreferences();
+      });
+      menu.addMenuItem(preferencesItem);
+      
+      if (Main.panel && Main.panel.addToStatusArea) {
+        Main.panel.addToStatusArea(this.uuid, this.indicator);
+        console.log("Indicator added to status area");
+      } else {
+        console.error("Main.panel or addToStatusArea not available");
+      }
+    } catch (e) {
+      console.error(`Error in _createIndicator: ${e}`);
+      console.error(e.stack);
+    }
+  }
+
+  _updateToggleMenuItem() {
+    if (this.toggleMenuItem) {
+      this.toggleMenuItem.setToggleState(this.enabled);
+    }
+  }
+
+  _openPreferences() {
+    // Open preferences window
+    GLib.spawn_command_line_async(`gnome-extensions prefs ${this.uuid}`);
   }
 
   initSettings() {
@@ -114,6 +206,7 @@ export default class HightlightCurrentWindow extends Extension {
     this.borderRadius = this._settings.get_int("border-radius");
     this.borderColor = this._settings.get_string("border-color");
     this.disableHiding = this._settings.get_boolean("disable-hiding");
+    this.enabled = this._settings.get_boolean("enabled");
     this._updateCss();
   }
 
@@ -127,6 +220,13 @@ export default class HightlightCurrentWindow extends Extension {
     this._style = null;
     wm.removeKeybinding("keybinding-highlight-now");
     this._settings = null;
+    
+    // Remove menubar icon
+    if (this.indicator) {
+      this.indicator.destroy();
+      this.indicator = null;
+    }
+    this.toggleMenuItem = null;
   }
 
   remove_all_borders() {
@@ -161,6 +261,12 @@ export default class HightlightCurrentWindow extends Extension {
   }
 
   highlight_window() {
+    // Check if border highlighting is enabled
+    if (!this.enabled) {
+      this.remove_all_borders();
+      return;
+    }
+
     this.timeouts.push(
       GLib.timeout_add(GLib.PRIORITY_DEFAULT, 1000, () => {
         this.sizing = false;
