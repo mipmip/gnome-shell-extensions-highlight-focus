@@ -69,7 +69,19 @@ export default class HightlightCurrentWindow extends Extension {
     );
     this.handles_wm.push(
       global.window_manager.connect("unminimize", () => {
+        this.remove_all_borders();
         this.sizing = true;
+
+        // schedule a short one-shot to allow the window to be mapped and focused,
+        // then clear sizing and call highlight_window() so the newly unminimized
+        // window gets highlighted.
+        this.remove_all_timeouts();
+        const t = GLib.timeout_add(GLib.PRIORITY_DEFAULT, 100, () => {
+          this.sizing = false;
+          this.highlight_window();
+          return GLib.SOURCE_REMOVE;
+        });
+        this.timeouts.push(t);
       }),
     );
     this._settings = this.getSettings();
