@@ -1,5 +1,7 @@
 # Highlight Focus
 
+## _[looking for a new maintainer](https://github.com/mipmip/gnome-shell-extensions-highlight-focus/issues/34)_
+
 ![highlightfocus](https://user-images.githubusercontent.com/658612/189703577-a3397e8e-ddff-4622-b46a-f7384fd70eb1.gif)
 
 Highlight is a GNOME Shell Extension which draws a temporary colored border
