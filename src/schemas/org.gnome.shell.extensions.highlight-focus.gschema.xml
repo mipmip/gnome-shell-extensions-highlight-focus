@@ -36,5 +36,11 @@
       <summary>Hide delay in microseconds</summary>
       <description>Delay in microseconds after when the border will be hidden.</description>
     </key>
+
+    <key name="enabled" type="b">
+      <default>true</default>
+      <summary>Enable border highlighting</summary>
+      <description>Enable or disable the border highlighting feature.</description>
+    </key>
   </schema>
 </schemalist>
